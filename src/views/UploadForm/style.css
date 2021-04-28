@@ -1,0 +1,19 @@
+.form-title {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.upload-button {
+    font-size: 1.2rem;   
+}
+
+.upload-button:hover {
+    color: red;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* .modal-90w {
+    width: 100vw !important;
+    max-width: none !important;
+} */
