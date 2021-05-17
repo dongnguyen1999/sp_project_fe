@@ -7,9 +7,7 @@ function WebMaster(props) {
   return (
     <div className="bg-light">
       <Header />
-      <Container>
-        {children}
-      </Container>
+      {children}
       <Footer />
     </div>
   );

@@ -1,12 +1,10 @@
-import { Checkbox, Icon } from "@material-ui/core";
-import { useState } from "react";
-import { Button, ListGroup, Modal, Tab, Tabs } from "react-bootstrap";
+import { Button, Modal, Tab, Tabs } from "react-bootstrap";
 import '../style.css'
 import ColumnList from "./ColumnList";
 
 
 function ViewExcelModal(props) {
-  const {show, onClose, onSubmit, onChange, sheets, data, fileName, uploadFields} = props;
+  const {show, onClose, onChange, sheets, data, fileName, uploadFields} = props;
   return (
     <>
       <Modal

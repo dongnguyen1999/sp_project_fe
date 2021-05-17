@@ -1,10 +1,9 @@
-import { Checkbox, Icon } from "@material-ui/core";
-import { useEffect, useState } from "react";
+import { Checkbox } from "@material-ui/core";
 import { ListGroup } from "react-bootstrap";
 
 
 function ColumnList(props) {
-  const {index, columns, uploadFields, onChange} = props;
+  const {columns, uploadFields, onChange} = props;
 
   const removeColFromSelected = (col) => {
     return uploadFields.filter(selectedCol => selectedCol != col)
