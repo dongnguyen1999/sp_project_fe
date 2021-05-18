@@ -6,6 +6,11 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+# Change api url:
+See src\setupProxy.js
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
 ### `npm start`
 
 Runs the app in the development mode.\

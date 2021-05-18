@@ -36,7 +36,7 @@ function UploadForm(props) {
       });
       return;
     }
-    const url = 'http://localhost:8000/api/upload-xlsx';
+    const url = '/api/upload-xlsx';
     const formData = new FormData();
     for (const [key, value] of Object.entries(submitData)) {
       console.log(`${key}: ${value}`);
@@ -50,7 +50,7 @@ function UploadForm(props) {
             'content-type': 'multipart/form-data',
             'Access-Control-Allow-Origin': '*'
         },
-        crossdomain: false,
+        crossdomain: true,
     }
     setTimeout(() => {
       postUploadXlsx(url, formData, config);
@@ -105,7 +105,7 @@ function UploadForm(props) {
                   <Form.Control type="text" name="squad_name" ref={register}/>
                 </Form.Group>
 
-                <UploadFileSelect name="xlsx" ref={register} require />
+                <UploadFileSelect name="xlsx" ref={register} />
 
                 <Container fluid>
                   <Row className="mt-5">
