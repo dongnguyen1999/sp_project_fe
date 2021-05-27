@@ -1,4 +1,4 @@
-import { Form, Row, Col, Button, Spinner } from 'react-bootstrap'
+import { Form, Row, Col, Button, Spinner, Dropdown, Fade } from 'react-bootstrap'
 import Container from 'react-bootstrap/Container'
 import "react-datepicker/dist/react-datepicker.css";
 import 'react-calendar/dist/Calendar.css';
@@ -9,9 +9,15 @@ import axios from 'axios';
 import NotificationModal from '../../components/NotificationModal';
 import { useState } from 'react';
 import LoadingOverlay from 'react-loading-overlay';
+import { FormGroup } from '@material-ui/core';
 
 function UploadForm(props) {
   const { register, handleSubmit } = useForm();
+  const fileTypes = [
+    {value: 'response-set', title: 'Response Set'},
+    {value: 'marking-scheme', title: 'Marking Scheme'},
+  ]
+  let [fileTypeIndex, setFileTypeIndex] = useState(0);
   let [showNotification, setShowNotification] = useState({
     isLoading: false,
     willShow: false,
@@ -36,7 +42,7 @@ function UploadForm(props) {
       });
       return;
     }
-    const url = 'http://localhost:8000/api/upload-xlsx';
+    const url = '/api/upload-xlsx';
     const formData = new FormData();
     for (const [key, value] of Object.entries(submitData)) {
       console.log(`${key}: ${value}`);
@@ -55,6 +61,22 @@ function UploadForm(props) {
     setTimeout(() => {
       postUploadXlsx(url, formData, config);
     }, 1000); //Just for test time; DO NOT delay before send request on release
+  }
+
+  const checkClassName = (className) => {
+    const url = '/api/upload-xlsx';
+    const formData = new FormData();
+    formData.append('squard-name', className);
+    const config = {
+        headers: {
+            'content-type': 'multipart/form-data',
+            'Access-Control-Allow-Origin': '*'
+        },
+        crossdomain: false,
+    }
+    axios.get(url, formData, config).then(response => response.data).then(response => {
+      console.log(response);
+    });
   }
 
   const postUploadXlsx = (url, formData, config) => {
@@ -101,27 +123,41 @@ function UploadForm(props) {
             <Row className="d-flex justify-content-center align-items-center" style={{width: 700}}>
               <Col xs={12} md={6}>
                 <Form.Group>
-                  <Form.Label>Squad Name:</Form.Label>
-                  <Form.Control type="text" name="squad_name" ref={register}/>
+                  <Form.Label>Upload file type:</Form.Label>
+                  <Dropdown>
+                    <Dropdown.Toggle className="w-100 font-weight-bold" variant="primary" id="dropdown-basic">
+                      {
+                        fileTypes[fileTypeIndex].title
+                      }
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu className="w-100">
+                      <Dropdown.Item onClick={() => setFileTypeIndex(0)} >Response Set</Dropdown.Item>
+                      <Dropdown.Item onClick={() => setFileTypeIndex(1)} >Marking Scheme</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
                 </Form.Group>
-
+                <Fade in={fileTypes[fileTypeIndex].value === 'response-set'}>
+                  <Form.Group>
+                    <Form.Label>Squad Name:</Form.Label>
+                    <Form.Control type="text" name="squad_name" ref={register}/>
+                  </Form.Group>  
+                </Fade>
                 <UploadFileSelect name="xlsx" ref={register} require />
-
                 <Container fluid>
                   <Row className="mt-5">
                     <Col xs={6} className="d-flex justify-content-center align-items-center">
-                      <Button variant="danger" type="reset" className="px0">
-                          Cancel
+                      <Button variant="danger" type="reset" className="px0" onClick={() => checkClassName('dong')}>
+                        Cancel
                       </Button>
                     </Col>
                     <Col xs={6} className="d-flex justify-content-center align-items-center">
                       <Button variant="primary" type="submit" className="px0">
-                          Upload
+                        Upload
                       </Button>
                     </Col>
                   </Row>
                 </Container>
-
               </Col>
             </Row>
           </Container>
