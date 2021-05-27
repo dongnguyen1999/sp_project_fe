@@ -1,4 +1,4 @@
-import { Button, Modal, Tab, Tabs } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 
 
 function NotificationModal(props) {

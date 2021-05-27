@@ -9,7 +9,6 @@ import axios from 'axios';
 import NotificationModal from '../../components/NotificationModal';
 import { useState } from 'react';
 import LoadingOverlay from 'react-loading-overlay';
-import { FormGroup } from '@material-ui/core';
 
 function UploadForm(props) {
   const { register, handleSubmit } = useForm();
@@ -26,18 +25,44 @@ function UploadForm(props) {
     message: 'Message',
   });
   
-  const submitFormHandler = (data) => {
+  const submitFormHandler = async (data) => {
+    console.log(data);
     setShowNotification({willShow: false, isLoading: true});
+    let squad_name = data?.squad_name;
+    if (squad_name) {
+      let isValidSquadName = await checkClassName(squad_name);
+      if (!isValidSquadName) {
+        setShowNotification({
+          willShow: true,
+          isLoading: false,
+          error: true,
+          title: 'Existed squad name',
+          body: 'This squad name is exist! Please enter another name!',
+        });
+        return;
+      }
+    }
     let submitData = {
       file: data.xlsx[0],
-      squad_name: data.squad_name,
+      squad_name: data?.squad_name,
+      file_type: fileTypes[fileTypeIndex].value,
+    }
+    if (fileTypeIndex === 0 && !submitData.squad_name) {
+      setShowNotification({
+        willShow: true,
+        isLoading: false,
+        error: true,
+        title: 'Require squad name',
+        body: 'Squad name is required! Please enter squad name!',
+      });
+      return;
     }
     if (!submitData.file) {
       setShowNotification({
         willShow: true,
         isLoading: false,
         error: true,
-        title: 'Error',
+        title: 'Require file',
         body: 'Please pick your xlsx file!',
       });
       return;
@@ -56,7 +81,7 @@ function UploadForm(props) {
             'content-type': 'multipart/form-data',
             'Access-Control-Allow-Origin': '*'
         },
-        crossdomain: false,
+        crossdomain: true,
     }
     setTimeout(() => {
       postUploadXlsx(url, formData, config);
@@ -64,18 +89,27 @@ function UploadForm(props) {
   }
 
   const checkClassName = (className) => {
-    const url = '/api/upload-xlsx';
-    const formData = new FormData();
-    formData.append('squard-name', className);
-    const config = {
-        headers: {
-            'content-type': 'multipart/form-data',
-            'Access-Control-Allow-Origin': '*'
-        },
-        crossdomain: false,
-    }
-    axios.get(url, formData, config).then(response => response.data).then(response => {
-      console.log(response);
+    const url = `/api/upload-xlsx?squad_name=${className}`;
+    return axios.get(url).then(response => {
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        setShowNotification({
+          willShow: true,
+          isLoading: false,
+          error: true,
+          title: 'Error',
+          body: 'Internal server error!',
+        });
+      }
+    }).catch(error => {
+      setShowNotification({
+        willShow: true,
+        isLoading: false,
+        error: true,
+        title: 'Error',
+        body: `Error occurred: ${error}`,
+      });
     });
   }
 
@@ -105,7 +139,7 @@ function UploadForm(props) {
         isLoading: false,
         error: true,
         title: 'Error',
-        body: 'Unknown error occurred!',
+        body: `Error occurred: ${error}`,
       });
     });
   } 
