@@ -29,7 +29,7 @@ function UploadForm(props) {
     console.log(data);
     setShowNotification({willShow: false, isLoading: true});
     let squad_name = data?.squad_name;
-    if (squad_name) {
+    if (fileTypeIndex === 0 && squad_name) {
       let isValidSquadName = await checkClassName(squad_name);
       if (!isValidSquadName) {
         setShowNotification({
