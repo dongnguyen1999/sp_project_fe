@@ -3,17 +3,8 @@ import React, { useState } from 'react';
 import { Form } from 'react-bootstrap';
 import '../style.css';
 
-const UploadFileSelect = React.forwardRef((props, ref) => {
-  let [fileSelected, setFileSelected] = useState(false);
-  let [fileName, setFileName] = useState('');
-
-  const handleChangeFile = (event) => {
-    let selected = event.target.files.length > 0;
-    setFileSelected(selected);
-    if (selected) {
-      setFileName(event.target.files[0].name);
-    }
-  }
+const UploadFileSelect = React.forwardRef((props, ref) => { 
+  const {fileSelected, fileName, handleChangeFile} = props;
     
   return (
     <div className="d-flex flex-column justify-content-center align-items-center">
