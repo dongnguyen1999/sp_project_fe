@@ -7,8 +7,7 @@ import { useForm } from 'react-hook-form';
 import UploadFileSelect from './components/UploadFileSelect';
 import axios from 'axios';
 import NotificationModal from '../../components/NotificationModal';
-import { useEffect, useState } from 'react';
-import LoadingOverlay from 'react-loading-overlay';
+import { useEffect, useRef, useState } from 'react';
 import ProgressBarModal from '../../components/ProgressBarModal';
 
 function UploadForm(props) {
@@ -19,7 +18,6 @@ function UploadForm(props) {
   ]
   let [fileTypeIndex, setFileTypeIndex] = useState(0);
   let [uploadProgress, setUploadProgress] = useState(0);
-  let [data, setData] = useState(null);
   let [submitForm, setSubmitForm] = useState(true);
   let [fileSelected, setFileSelected] = useState(false);
   let [fileName, setFileName] = useState('');
@@ -30,6 +28,7 @@ function UploadForm(props) {
     title: 'Information Notification',
     message: 'Message',
   });
+  const submitFormRef = useRef(submitForm);
 
   const handleChangeFile = (event) => {
     let selected = event.target.files.length > 0;
@@ -39,20 +38,12 @@ function UploadForm(props) {
     }
   }
 
-  const onSubmit = async (data) => {
-    setTimeout(() => {
-      function logSubmitForm(value) {
-        console.log(value);
-      }
-      logSubmitForm(submitForm);
-    }, 5000);
-  }
-
   
   
   const submitFormHandler = async (data) => {
     console.log(data);
     setShowNotification({willShow: false, isLoading: false});
+    setSubmitForm(true);
     let squad_name = data?.squad_name;
     if (fileTypeIndex === 0 && squad_name) {
       let isValidSquadName = await checkClassName(squad_name);
@@ -101,34 +92,34 @@ function UploadForm(props) {
       {time: 200, start:90, end:95},
     ]);
 
-    console.log(submitForm);
-    // const url = '/api/upload-xlsx';
-    // const formData = new FormData();
-    // for (const [key, value] of Object.entries(data)) {
-    //   console.log(`${key}: ${value}`);
-    //   if (key === 'xlsx') {
-    //     formData.append('xlsx',value[0]);
-    //   }
-    //   else formData.append(key ,value);
-    // }
-    // const config = {
-    //     headers: {
-    //         'content-type': 'multipart/form-data',
-    //         'Access-Control-Allow-Origin': '*'
-    //     },
-    //     crossdomain: true,
-    // }
-    // postUploadXlsx(url, formData, config);
+    // console.log(submitForm);
+    if (submitFormRef.current) {
+      const url = '/api/upload-xlsx';
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(submitData)) {
+        console.log(`${key}: ${value}`);
+        if (key === 'xlsx') {
+          formData.append('xlsx',value[0]);
+        }
+        else formData.append(key ,value);
+      }
+      const config = {
+          headers: {
+              'content-type': 'multipart/form-data',
+              'Access-Control-Allow-Origin': '*'
+          },
+          crossdomain: true,
+      }
+      postUploadXlsx(url, formData, config);
+    }
   }
 
   const executeUploadProgress = async ({time, start=0, end=90}) => {
     const timer = ms => new Promise(res => setTimeout(res, ms))
     let nb_percent = end - start + 1;
     for (let i = start; i < end; i++) {
-      // if (showNotification.isLoading) {
-        setUploadProgress(i);
-        await timer(time/nb_percent)
-      // } else break;
+      setUploadProgress(i);
+      await timer(time/nb_percent)
     }
     setUploadProgress(0);
   }
@@ -137,13 +128,12 @@ function UploadForm(props) {
     for (let step of steps) {
       await executeUploadProgress(step);
     }
-    // console.log(showNotification.isLoading);
-    // if (showNotification.isLoading) setSubmitForm(true);
   }
 
   const checkClassName = (className) => {
     const url = `/api/upload-xlsx?squad_name=${className}`;
     return axios.get(url).then(response => {
+      console.log(response);
       if (response.status === 200) {
         return response.data;
       } else {
@@ -197,9 +187,13 @@ function UploadForm(props) {
     });
   } 
 
+  useEffect(() => {
+    submitFormRef.current = submitForm;
+  }, [submitForm])
+
   return (
     <Container className="pt-4 pb-4">
-      <Form className="d-block mx-auto" onSubmit={handleSubmit(onSubmit)}>
+      <Form className="d-block mx-auto" onSubmit={handleSubmit(submitFormHandler)}>
         <h1 className="form-title">Enhance tool: Upload files</h1>
         <Container className="bg-white p-5 d-flex justify-content-center" style={{height: 750}}>
           <Row className="d-flex justify-content-center align-items-center" style={{width: 700}}>
@@ -229,10 +223,7 @@ function UploadForm(props) {
               <Container fluid>
                 <Row className="mt-5">
                   <Col xs={6} className="d-flex justify-content-center align-items-center">
-                    {/* <Button variant="danger" type="reset" className="px0" onClick={() => {setFileSelected(false); setFileName('')}}>
-                      Reset
-                    </Button> */}
-                    <Button variant="danger" type="reset" className="px0" onClick={() => {setSubmitForm((submitForm) => false)}}>
+                    <Button variant="danger" type="reset" className="px0" onClick={() => {setFileSelected(false); setFileName('')}}>
                       Reset
                     </Button>
                   </Col>
@@ -253,7 +244,7 @@ function UploadForm(props) {
           message={`Uploading ${fileTypes[fileTypeIndex].value} file...`}
           variant={'primary'}
           progress={uploadProgress}
-          onCancel={() => setShowNotification(showNotification => ({...showNotification, isLoading: false, willShow: false}))}
+          onCancel={() => {setShowNotification(showNotification => ({...showNotification, isLoading: false, willShow: false})); setSubmitForm(false)}}
         />
 
         <NotificationModal 
